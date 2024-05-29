@@ -43,7 +43,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Create authentication file
+        run: echo "${{ secrets.SF_ORG_SKINT__AUTH_URL }}" > auth-url.txt
+
       - name: Authorize Salesforce environment
-        run: sf org login sfdx-url -f ${{ secrets.SF_ORG_SKINT_AUTH_URL }}
-        env:
-          SF_ORG_SKINT_AUTH_URL: ${{ secrets.SF_ORG_SKINT_AUTH_URL }}
+        run: sf org login sfdx-url -f auth-url.txt
