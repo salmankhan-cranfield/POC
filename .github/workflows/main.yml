@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 'lts/*'
+          node-version: 'lts/*'  # This will install the latest LTS version of Node.js
           
       - name: Install Salesforce CLI
         run: npm i -g @salesforce/cli@latest
@@ -33,3 +33,17 @@ jobs:
           node -v
           npm -v
           sf --version
+
+  authorize-salesforce:
+    runs-on: ubuntu-latest
+    
+    needs: install-node-and-sf-cli
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Authorize Salesforce environment
+        run: sf org login sfdx-url -f ${{ secrets.SF_ORG_SKINT_AUTH_URL }}
+        env:
+          SF_ORG_SKINT_AUTH_URL: ${{ secrets.SF_ORG_SKINT_AUTH_URL }}
