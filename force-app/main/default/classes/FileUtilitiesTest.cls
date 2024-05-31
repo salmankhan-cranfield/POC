@@ -49,7 +49,7 @@ private with sharing class FileUtilitiesTest {
         insert property;
 
         String base64Data = '';
-        String fileName = 'file.png';
+        String fileName = 'skfile.png';
         String recordId = property.Id;
 
         try {
