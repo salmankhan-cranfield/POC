@@ -41,4 +41,4 @@ jobs:
         run: sf org login sfdx-url -f ./AUTH_URL.txt
 
       - name: Validate deployment - running local tests
-        run: sf project deploy validate --source-dir force-app --test-level RunAllTestsInOrg --target-org skint@fake.com
+        run: sf project deploy validate --source-dir force-app --test-level RunAllTestsInOrg --target-org skint@fake.com --verbose
