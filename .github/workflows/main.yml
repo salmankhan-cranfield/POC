@@ -28,15 +28,15 @@ jobs:
           npm -v
           sf --version
 
-      - name: Check current branch
-        run: echo "Current branch is ${{ github.ref }}"
+      - name: Check target branch
+        run: echo "Target branch is ${{ github.event.pull_request.base.ref }}"
 
       - name: Create authentication file for INT
-        if: startsWith(github.ref, 'refs/heads/INT')
+        if: ${{ github.event.pull_request.base.ref == 'INT' }}
         run: echo "${{ secrets.SF_ORG_SKINT__AUTH_URL }}" > ./AUTH_URL.txt
 
       - name: Create authentication file for UAT
-        if: startsWith(github.ref, 'refs/heads/uat')
+        if: ${{ github.event.pull_request.base.ref == 'uat' }}
         run: echo "${{ secrets.SF_ORG_SKUAT__AUTH_URL }}" > ./AUTH_URL.txt
 
       - name: List files in current directory
