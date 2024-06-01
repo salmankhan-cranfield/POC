@@ -10,7 +10,7 @@ on:
     # The branches filter allows to specify that this workflow should only
     # run if the branch name is "develop". This way we prevent this workflow
     # from running when PRs are opened on other branches
-    branches: [INT]
+    branches: [INT, uat]
 
 jobs:
   validate-pr:
@@ -34,11 +34,17 @@ jobs:
           npm -v
           sf --version
 
-      - name: Create authentication file
+      - name: Create authentication file for INT
+        if: github.ref == 'refs/heads/INT'
         run: echo "${{ secrets.SF_ORG_SKINT__AUTH_URL }}" > ./AUTH_URL.txt
+
+      - name: Create authentication file for UAT
+        if: github.ref == 'refs/heads/uat'
+        run: echo "${{ secrets.SF_ORG_SKUAT__AUTH_URL }}" > ./AUTH_URL.txt
 
       - name: Authorize Salesforce environment
         run: sf org login sfdx-url -f ./AUTH_URL.txt
 
       - name: Validate deployment - running local tests
         run: sf project deploy validate --source-dir force-app --test-level RunAllTestsInOrg --target-org skint@fake.com --verbose
+
