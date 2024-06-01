@@ -2,14 +2,8 @@ name: Validate PR on develop branch
 
 # Definition when the workflow should run
 on:
-  # The workflow will run whenever an event happens on a pull request
   pull_request:
-    # The events are that a PR is opened, or when a commit is pushed
-    # to a branch that has an existing pull request
     types: [opened, synchronize]
-    # The branches filter allows to specify that this workflow should only
-    # run if the branch name is "develop". This way we prevent this workflow
-    # from running when PRs are opened on other branches
     branches: [INT, uat]
 
 jobs:
@@ -23,7 +17,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 'lts/*'  # This will install the latest LTS version of Node.js
+          node-version: 'lts/*'
           
       - name: Install Salesforce CLI
         run: npm i -g @salesforce/cli@latest
@@ -34,17 +28,22 @@ jobs:
           npm -v
           sf --version
 
+      - name: Check current branch
+        run: echo "Current branch is ${{ github.ref }}"
+
       - name: Create authentication file for INT
-        if: github.ref == 'refs/heads/INT'
+        if: startsWith(github.ref, 'refs/heads/INT')
         run: echo "${{ secrets.SF_ORG_SKINT__AUTH_URL }}" > ./AUTH_URL.txt
 
       - name: Create authentication file for UAT
-        if: github.ref == 'refs/heads/uat'
+        if: startsWith(github.ref, 'refs/heads/uat')
         run: echo "${{ secrets.SF_ORG_SKUAT__AUTH_URL }}" > ./AUTH_URL.txt
+
+      - name: List files in current directory
+        run: ls -l
 
       - name: Authorize Salesforce environment
         run: sf org login sfdx-url -f ./AUTH_URL.txt
 
       - name: Validate deployment - running local tests
         run: sf project deploy validate --source-dir force-app --test-level RunAllTestsInOrg --target-org skint@fake.com --verbose
-
