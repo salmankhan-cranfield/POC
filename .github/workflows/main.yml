@@ -25,11 +25,17 @@ jobs:
       - name: Install sf Code Analyzer
         run: sf plugins install @salesforce/sfdx-scanner
 
+      - name: Install Java
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y default-jdk
+
       - name: Verify installations
         run: |
           node -v
           npm -v
           sf --version
+          java -version
 
       - name: Check target branch
         run: echo "Target branch is ${{ github.event.pull_request.base.ref }}"
