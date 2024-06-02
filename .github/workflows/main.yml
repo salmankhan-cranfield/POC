@@ -55,10 +55,10 @@ jobs:
         run: sf scanner run --target force-app/main/default/classes --engine pmd --format table --severity-threshold 2
 
       - name: publish pmd
-        run: sf scanner run --target './**/*.cls' --category "Design,Best Practices,Performance" --outfile 'apexScanResults.sarif'
+        run: sf scanner run --target './**/*.cls' --category "Design,Best Practices,Performance" --engine pmd --outfile 'apexScanResults.sarif'
 
       - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v1
+        uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: apexScanResults.sarif
 
