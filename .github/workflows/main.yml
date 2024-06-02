@@ -23,7 +23,7 @@ jobs:
         run: npm i -g @salesforce/cli@latest
         
       - name: Install sf Code Analyzer
-        run: sf plugins install @salesforce/sfdx-scanner
+        run: sf plugins install @salesforce/sfdx-scanner@latest-beta
 
       - name: Install Java
         run: |
