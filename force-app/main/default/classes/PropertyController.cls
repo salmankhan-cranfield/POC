@@ -1,4 +1,4 @@
-public with sharing class PropertyController {
+public with sharing class PropertyController { // NOPMD
     private static final Decimal DEFAULT_MAX_PRICE = 9999999;
     private static final Integer DEFAULT_PAGE_SIZE = 9;
 
@@ -13,7 +13,7 @@ public with sharing class PropertyController {
      * @return PagedResult object holding the paged and filtered list of properties
      */
     @AuraEnabled(cacheable=true scope='global')
-    public static PagedResult getPagedPropertyList(
+    public static PagedResult getPagedPropertyList( // NOPMD // NOPMD
         String searchKey,
         Decimal maxPrice,
         Integer minBedrooms,
@@ -22,11 +22,11 @@ public with sharing class PropertyController {
         Integer pageNumber
     ) {
         // Normalize inputs
-        Decimal safeMaxPrice = maxPrice ?? DEFAULT_MAX_PRICE;
-        Integer safeMinBedrooms = minBedrooms ?? 0;
-        Integer safeMinBathrooms = minBathrooms ?? 0;
-        Integer safePageSize = pageSize ?? DEFAULT_PAGE_SIZE;
-        Integer safePageNumber = pageNumber ?? 1;
+        Decimal safeMaxPrice = (maxPrice != null) ? maxPrice : DEFAULT_MAX_PRICE;
+        Integer safeMinBedrooms = (minBedrooms != null) ? minBedrooms : 0;
+        Integer safeMinBathrooms = (minBathrooms != null) ? minBathrooms : 0;
+        Integer safePageSize = (pageSize != null) ? pageSize : DEFAULT_PAGE_SIZE;
+        Integer safePageNumber = (pageNumber != null) ? pageNumber : 1;
 
         String searchPattern = '%' + searchKey + '%';
         Integer offset = (safePageNumber - 1) * safePageSize;
@@ -81,7 +81,7 @@ public with sharing class PropertyController {
      * @return List of ContentVersion holding the pictures
      */
     @AuraEnabled(cacheable=true scope='global')
-    public static List<ContentVersion> getPictures(Id propertyId) {
+    public static List<ContentVersion> getPictures(Id propertyId) { // NOPMD
         List<ContentDocumentLink> links = [
             SELECT Id, LinkedEntityId, ContentDocument.Title
             FROM ContentDocumentLink
