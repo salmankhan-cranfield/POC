@@ -30,7 +30,6 @@ jobs:
           node -v
           npm -v
           sf --version
-          sf plugins @salesforce/sfdx-scanner
 
       - name: Check target branch
         run: echo "Target branch is ${{ github.event.pull_request.base.ref }}"
