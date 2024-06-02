@@ -52,7 +52,7 @@ jobs:
         run: ls -l
 
       - name: Run PMD checks
-        run: sf scanner run --target force-app/main/default/classes --engine pmd --format table --severity-threshold 1
+        run: sf scanner run --target force-app/main/default/classes --engine pmd --format table --severity-threshold 3
 
       - name: Authorize Salesforce environment
         run: sf org login sfdx-url -f ./AUTH_URL.txt
