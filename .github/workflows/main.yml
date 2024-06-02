@@ -22,11 +22,15 @@ jobs:
       - name: Install Salesforce CLI
         run: npm i -g @salesforce/cli@latest
         
+      - name: Install sf Code Analyzer
+        run: sf plugins install @salesforce/sfdx-scanner
+
       - name: Verify installations
         run: |
           node -v
           npm -v
           sf --version
+          sf plugins @salesforce/sfdx-scanner
 
       - name: Check target branch
         run: echo "Target branch is ${{ github.event.pull_request.base.ref }}"
