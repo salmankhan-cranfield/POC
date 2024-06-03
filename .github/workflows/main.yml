@@ -52,7 +52,7 @@ jobs:
         run: ls -l
 
       - name: Run PMD checks
-        run: sf scanner run --target force-app/main/default/classes --engine pmd --format table --severity-threshold 2
+        run: sf scanner run --target force-app/main/default/classes --engine pmd --format table --severity-threshold 3
 
       - name: publish pmd
         run: sf scanner run --target './**/*.cls' --category "Design,Best Practices,Performance" --engine pmd --outfile 'apexScanResults.sarif'
