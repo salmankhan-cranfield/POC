@@ -1,0 +1,108 @@
+name: Validate PR on develop branch
+
+# Definition when the workflow should run
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches: [INT, uat]
+
+jobs:
+  validate-pr:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+          
+      - name: Install Salesforce CLI
+        run: npm i -g @salesforce/cli@latest
+        
+      - name: Install sf Code Analyzer
+        run: sf plugins install @salesforce/sfdx-scanner@latest-beta
+
+      - name: Install Java
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y default-jdk
+
+      - name: Verify installations
+        run: |
+          node -v
+          npm -v
+          sf --version
+          java -version
+
+      - name: Check target branch
+        run: echo "Target branch is ${{ github.event.pull_request.base.ref }}"
+
+      - name: Create authentication file for INT
+        if: ${{ github.event.pull_request.base.ref == 'INT' }}
+        run: echo "${{ secrets.SF_ORG_SKINT__AUTH_URL }}" > ./AUTH_URL.txt
+
+      - name: Create authentication file for UAT
+        if: ${{ github.event.pull_request.base.ref == 'uat' }}
+        run: echo "${{ secrets.SF_ORG_SKUAT__AUTH_URL }}" > ./AUTH_URL.txt
+
+      - name: List files in current directory
+        run: ls -l
+
+      - name: Run PMD checks
+        run: sf scanner run --target force-app/main/default/classes --engine pmd --format table --severity-threshold 3
+
+      - name: publish pmd
+        run: sf scanner run --target './**/*.cls' --category "Design,Best Practices,Performance" --engine pmd --outfile 'apexScanResults.sarif'
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: apexScanResults.sarif
+
+      - name: Authorize Salesforce environment
+        run: sf org login sfdx-url -f ./AUTH_URL.txt
+
+      - name: Validate deployment - running local tests for INT
+        if: ${{ github.event.pull_request.base.ref == 'INT' }}
+        run: sf project deploy validate --source-dir force-app --test-level RunAllTestsInOrg --target-org ${{ vars.INT }} --verbose
+
+      - name: Validate deployment - running local tests for UAT
+        if: ${{ github.event.pull_request.base.ref == 'uat' }}
+        run: sf project deploy validate --source-dir force-app --test-level RunAllTestsInOrg --target-org ${{ vars.UAT }} --verbose
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: validate-pr
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+          
+      - name: Install Salesforce CLI
+        run: npm i -g @salesforce/cli@latest
+        
+      - name: Verify installations
+        run: |
+          node -v
+          npm -v
+          sf --version
+
+      - name: Check branch
+        run: echo "Current branch is ${{ github.ref }}"
+
+      - name: Deploy to INT
+        if: ${{ github.ref == 'refs/heads/INT' }}
+        run: sf project deploy --source-dir force-app --test-level RunAllTestsInOrg --target-org ${{ vars.INT }} --verbose
+
+      - name: Deploy to UAT
+        if: ${{ github.ref == 'refs/heads/uat' }}
+        run: sf project deploy --source-dir force-app --test-level RunAllTestsInOrg --target-org ${{ vars.UAT }} --verbose
