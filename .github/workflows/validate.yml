@@ -42,7 +42,7 @@ jobs:
           echo "jq version: $(jq --version)"
 
       - name: Run PMD checks
-        run: sf scanner run --target force-app/main/default/classes --engine pmd --pmdconfig pmdconfig.xml  --format table --severity-threshold 2
+        run: sf scanner run --target force-app/main/default/classes --engine pmd --format table --severity-threshold 2
   
       - name: Authenticate Salesforce environment
         run: echo "${{ secrets.SF_ORG_SKINT__AUTH_URL }}" > ./AUTH_URL.txt
