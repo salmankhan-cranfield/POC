@@ -1,0 +1,66 @@
+name: Validate branch for INT environment
+
+on:
+  workflow_dispatch
+
+jobs: 
+  deploy:
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Echo test message
+        run: echo "this is a test" 
+      
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+          
+      - name: Install Salesforce CLI
+        run: npm i -g @salesforce/cli@latest
+
+      - name: Install Java
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y default-jdk
+          
+      - name: Install Salesforce Code Analyzer Plugin
+        run: sf plugins install @salesforce/sfdx-scanner
+  
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
+      - name: Verify installations
+        run: |
+          echo "Node.js version: $(node -v)"
+          echo "NPM version: $(npm -v)"
+          echo "Salesforce CLI version: $(sf --version)"
+          echo "Java version: $(java -version 2>&1 | head -n 1)"
+          echo "jq version: $(jq --version)"
+
+      - name: Run PMD checks
+        run: sf scanner run --target force-app/main/default/classes --engine pmd --pmdconfig pmdconfig.xml  --format table --severity-threshold 2
+  
+      - name: Authenticate Salesforce environment
+        run: echo "${{ secrets.SF_ORG_SKINT__AUTH_URL }}" > ./AUTH_URL.txt
+
+      - name: Authorize INT environment
+        run: sf org login sfdx-url -f ./AUTH_URL.txt -s -a INT
+
+      - name: List files in current directory
+        run: ls -l
+
+      - name: Validate and run local tests
+        run: sf project deploy start --dry-run --test-level RunLocalTests --verbose --coverage-formatters json-summary --results-dir test-results
+
+      - name: Make check-coverage.sh executable
+        run: chmod +x ./check-coverage.sh
+        
+      - name: Check Test Coverage
+        run: ./check-coverage.sh
+
+
+
